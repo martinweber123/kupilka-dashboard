@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kupilka Chile — Dashboard Financiero</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --k:       #430300;
+  --k2:      #6B0500;
+  --k3:      #f9f0f0;
+  --o:       #F6861F;
+  --o2:      #FEF3E7;
+  --cr:      #F8DABA;
+  --g:       #2A7D4F;
+  --g2:      #E8F5EE;
+  --r:       #C0392B;
+  --r2:      #FDEDEC;
+  --w:       #D4820A;
+  --w2:      #FEF5E7;
+  --bd:      rgba(67,3,0,.12);
+  --bd2:     rgba(67,3,0,.25);
+  --tx:      #1a0a09;
+  --mu:      #7a4f4c;
+  --bg:      #fdf8f6;
+  --cd:      #ffffff;
+  --cd2:     #fdf5f0;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--tx);font-size:13px;}
+
+/* TOPBAR */
+.top{background:var(--k);color:#fff;padding:0 24px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(67,3,0,.3);}
+.tl{display:flex;align-items:center;gap:10px;}
+.tlogo{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--cr);}
+.tsub{font-size:11px;color:rgba(248,218,186,.6);letter-spacing:1.2px;text-transform:uppercase;}
+.tr2{display:flex;align-items:center;gap:10px;}
+.tst{display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(248,218,186,.7);}
+.dot{width:7px;height:7px;border-radius:50%;background:#555;}
+.dot.ok{background:#4CAF50;box-shadow:0 0 5px #4CAF50;}
+.dot.err{background:#f44336;}
+.dot.sp{background:var(--o);animation:bl 1s infinite;}
+@keyframes bl{0%,100%{opacity:1;}50%{opacity:.3;}}
+.bcfg{background:rgba(246,134,31,.2);border:1px solid rgba(246,134,31,.4);color:var(--cr);padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Lato',sans-serif;}
+.bcfg:hover{background:rgba(246,134,31,.35);}
+.brun{background:var(--o);border:none;color:#fff;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Lato',sans-serif;}
+.brun:hover{opacity:.88;}.brun:disabled{opacity:.4;cursor:default;}
+
+/* MODAL */
+.ov{position:fixed;inset:0;background:rgba(67,3,0,.55);z-index:200;display:none;align-items:center;justify-content:center;}
+.ov.on{display:flex;}
+.mod{background:var(--cd);border-radius:12px;padding:26px;width:480px;max-width:95vw;box-shadow:0 20px 60px rgba(67,3,0,.3);}
+.mtt{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--k);margin-bottom:5px;}
+.msb{font-size:12px;color:var(--mu);margin-bottom:14px;line-height:1.6;}
+.mhn{font-size:11px;color:var(--mu);background:var(--k3);padding:9px 11px;border-radius:7px;margin-bottom:14px;line-height:1.7;}
+.mhn code{background:rgba(67,3,0,.1);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:10px;}
+.fl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mu);margin-bottom:4px;}
+.fi{width:100%;border:1px solid var(--bd2);border-radius:6px;padding:7px 10px;font-size:12px;font-family:'Lato',sans-serif;color:var(--tx);background:var(--bg);margin-bottom:10px;}
+.fi:focus{outline:none;border-color:var(--o);}
+.mbt{display:flex;gap:8px;justify-content:flex-end;margin-top:4px;}
+.bp{background:var(--k);color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Lato',sans-serif;}
+.bs{background:transparent;color:var(--k);border:1px solid var(--bd2);padding:8px 16px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Lato',sans-serif;}
+
+/* LOADING */
+.ldg{position:fixed;inset:0;background:var(--bg);z-index:150;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+.ldg.hid{display:none;}
+.sp{width:38px;height:38px;border:3px solid var(--bd);border-top-color:var(--k);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.lm{font-size:14px;color:var(--k);font-weight:700;}
+.ls{font-size:12px;color:var(--mu);}
+
+/* NAV */
+.nav{background:var(--cd);border-bottom:1px solid var(--bd);display:flex;padding:0 24px;overflow-x:auto;}
+.nb{padding:13px 15px;font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--mu);cursor:pointer;border:none;border-bottom:3px solid transparent;background:none;white-space:nowrap;font-family:'Lato',sans-serif;margin-bottom:-1px;}
+.nb:hover{color:var(--k);}
+.nb.on{color:var(--k);border-bottom-color:var(--o);}
+
+/* PAGE */
+.pg{display:none;padding:22px 24px;max-width:1120px;margin:0 auto;}
+.pg.on{display:block;}
+.pgtit{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--k);}
+.pgsub{font-size:11px;color:var(--mu);margin-top:3px;margin-bottom:18px;}
+
+/* GRIDS */
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;}
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:14px;}
+.g21{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px;}
+
+/* METRIC */
+.mt{background:var(--cd2);border:1px solid var(--bd);border-radius:10px;padding:14px 15px;position:relative;overflow:hidden;}
+.mt::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--o);}
+.mt.mk::before{background:var(--k);}
+.mt.mg::before{background:var(--g);}
+.mt.mr::before{background:var(--r);}
+.mt.mw::before{background:var(--w);}
+.ml{font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px;}
+.mv{font-size:21px;font-weight:700;font-family:'Playfair Display',serif;color:var(--k);}
+.mv.vg{color:var(--g);}.mv.vr{color:var(--r);}.mv.vo{color:var(--o);}.mv.vw{color:var(--w);}
+.ms{font-size:11px;color:var(--mu);margin-top:3px;}
+
+/* CARD */
+.cd{background:var(--cd);border:1px solid var(--bd);border-radius:10px;padding:15px;margin-bottom:14px;}
+.cdh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:9px;border-bottom:1px solid var(--bd);}
+.cdt{font-family:'Playfair Display',serif;font-size:14px;font-weight:600;color:var(--k);}
+.bg{font-size:10px;font-weight:700;text-transform:uppercase;padding:2px 8px;border-radius:20px;}
+.bok{background:var(--g2);color:var(--g);}
+.bwn{background:var(--w2);color:var(--w);}
+.ber{background:var(--r2);color:var(--r);}
+.bbk{background:var(--k3);color:var(--k);}
+.bor{background:var(--o2);color:var(--w);}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mu);padding:5px 9px;text-align:left;border-bottom:1px solid var(--bd);}
+tbody td{padding:7px 9px;border-bottom:1px solid rgba(67,3,0,.05);}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:var(--k3);}
+.tr{text-align:right;}.tc{text-align:center;}.tb{font-weight:700;}
+.cg{color:var(--g);}.cr{color:var(--r);}.cw{color:var(--w);}.cm{color:var(--mu);}
+
+/* CHIP */
+.ch{display:inline-flex;align-items:center;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:700;}
+.chp{background:#FEF3E7;color:#854F0B;}
+.chf{background:#E6F1FB;color:#185FA5;}
+.chi{background:var(--g2);color:var(--g);}
+.chv{background:#F1EFE8;color:#5F5E5A;}
+.chq{background:var(--w2);color:var(--w);}
+.cht{background:#f0f0f0;color:#888;}
+
+/* PROG */
+.prg{height:5px;background:var(--bd);border-radius:3px;overflow:hidden;margin-top:4px;}
+.prf{height:100%;border-radius:3px;}
+
+/* ALERT */
+.alb{display:flex;align-items:flex-start;gap:9px;padding:9px 11px;border-radius:8px;border-left:3px solid;margin-bottom:8px;}
+.alw{background:var(--w2);border-color:var(--w);}
+.ale{background:var(--r2);border-color:var(--r);}
+.ali{background:#EBF4FB;border-color:#2B7BB9;}
+.alt{font-size:12px;font-weight:700;}
+.alw .alt{color:var(--w);}.ale .alt{color:var(--r);}.ali .alt{color:#185FA5;}
+.albd{font-size:11px;color:var(--mu);margin-top:2px;}
+
+/* MONTH PILLS */
+.mf{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px;}
+.mfb{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--bd2);background:transparent;color:var(--mu);font-family:'Lato',sans-serif;}
+.mfb:hover{border-color:var(--k);color:var(--k);}
+.mfb.on{background:var(--k);color:#fff;border-color:var(--k);}
+
+/* CHART */
+.cw{position:relative;width:100%;height:220px;}
+
+/* FUENTES */
+.frow{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:8px;background:var(--cd2);border:1px solid var(--bd);margin-bottom:8px;}
+.fn{font-size:13px;font-weight:700;color:var(--tx);}
+.fsb{font-size:11px;color:var(--mu);margin-top:2px;}
+.fst{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;}
+.dok{color:var(--g);}.derr{color:var(--r);}.dwn{color:var(--w);}
+
+/* ARCHIVOS FALTANTES */
+.missing-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+.missing-cell{border-radius:8px;padding:10px;text-align:center;font-size:11px;border:1px solid;}
+.mcok{background:var(--g2);border-color:var(--g);color:var(--g);}
+.mcmis{background:var(--r2);border-color:var(--r);color:var(--r);}
+.mcpar{background:var(--w2);border-color:var(--w);color:var(--w);}
+.mc-mes{font-weight:700;margin-bottom:4px;}
+.mc-ico{font-size:16px;}
+
+/* DIVIDER */
+.dv{height:1px;background:var(--bd);margin:12px 0;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--k);color:#fff;padding:10px 16px;border-radius:8px;font-size:12px;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none;z-index:300;}
+.toast.show{opacity:1;}
+
+@media(max-width:700px){.g4,.g3{grid-template-columns:repeat(2,1fr);}.g2,.g21{grid-template-columns:1fr;}.pg{padding:14px;}.top{padding:0 14px;}}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="ldg hid" id="ldg">
+  <div class="sp"></div>
+  <div class="lm" id="lm">Leyendo archivos desde Drive…</div>
+  <div class="ls" id="ls"></div>
+</div>
+
+<!-- TOPBAR -->
+<div class="top">
+  <div class="tl">
+    <span class="tlogo">KUPILKA</span>
+    <span style="color:rgba(248,218,186,.3);font-size:18px;margin:0 2px">·</span>
+    <span class="tsub">Dashboard Financiero · Highlander SPA</span>
+  </div>
+  <div class="tr2">
+    <div class="tst">
+      <div class="dot" id="sDot"></div>
+      <span id="sTxt">Sin configurar</span>
+    </div>
+    <button class="bcfg" onclick="showCfg()">⚙ Configurar</button>
+    <button class="brun" id="btnRun" onclick="cargarDatos()" disabled>↺ Actualizar datos</button>
+  </div>
+</div>
+
+<!-- CONFIG MODAL -->
+<div class="ov" id="cfgModal">
+  <div class="mod">
+    <div class="mtt">Configuración</div>
+    <div class="msb">Ingresa tu API key de Anthropic. Las carpetas de Drive ya están configuradas con los IDs correctos.</div>
+    <div class="mhn">
+      <strong>¿Cómo obtener la API key?</strong><br>
+      Ve a <code>console.anthropic.com</code> → API Keys → Create Key<br>
+      Es la misma que usa el dashboard de Neumomed.
+    </div>
+    <div class="fl">Anthropic API Key</div>
+    <input class="fi" id="cfgKey" type="password" placeholder="sk-ant-api03-...">
+    <div class="dv"></div>
+    <div style="font-size:11px;color:var(--mu);margin-bottom:10px;">Las carpetas de Drive ya están configuradas. Solo cámbialas si es necesario.</div>
+    <div class="fl">Carpeta cartolas banco</div>
+    <input class="fi" id="cfgCartola" value="1Z0gEufRljRk9w17gKNiDt60xccrXz7SN">
+    <div class="fl">Carpeta estados de cuenta tarjeta</div>
+    <input class="fi" id="cfgTarjeta" value="1xxCxUy5uGaWQBFEcItQnyI95gGw2Smdk">
+    <div class="fl">Carpeta ventas Shopify</div>
+    <input class="fi" id="cfgShopify" value="1awxl4DsG1Xi-FLqJKETHDg5Q6lt9KgfK">
+    <div class="mbt">
+      <button class="bs" onclick="hideCfg()">Cancelar</button>
+      <button class="bp" onclick="saveCfg()">Guardar y conectar</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button class="nb on"  onclick="showPg('resumen',this)">Resumen</button>
+  <button class="nb"     onclick="showPg('gastos',this)">Gastos</button>
+  <button class="nb"     onclick="showPg('ventas',this)">Ventas Shopify</button>
+  <button class="nb"     onclick="showPg('flujo',this)">Flujo de caja</button>
+  <button class="nb"     onclick="showPg('movs',this)">Movimientos</button>
+  <button class="nb"     onclick="showPg('fuentes',this)">Fuentes & archivos</button>
+</div>
+
+<!-- ═══ RESUMEN ═══ -->
+<div class="pg on" id="pg-resumen">
+  <div class="pgtit">Resumen financiero</div>
+  <div class="pgsub" id="sub-resumen">Configura la API key para leer los datos desde Drive</div>
+  <div class="g4" id="kpi-resumen"></div>
+  <div class="g21">
+    <div class="cd">
+      <div class="cdh"><span class="cdt">Ingresos vs gastos por mes</span><span class="bg bbk" id="badge-periodo">—</span></div>
+      <div class="cw"><canvas id="resumenChart" role="img" aria-label="Ingresos vs gastos mensuales"></canvas></div>
+      <div style="display:flex;gap:14px;margin-top:8px;font-size:11px;color:var(--mu)">
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:#2A7D4F;display:inline-block"></span>Ingresos Shopify</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:#C0392B;display:inline-block"></span>Gastos</span>
+      </div>
+    </div>
+    <div>
+      <div class="cd" style="margin-bottom:14px">
+        <div class="cdh"><span class="cdt">Top productos</span></div>
+        <div id="top-prods"></div>
+      </div>
+      <div class="cd">
+        <div class="cdh"><span class="cdt">Pasarelas de pago</span></div>
+        <div class="cw" style="height:160px"><canvas id="pasChart" role="img" aria-label="Distribución por pasarela de pago"></canvas></div>
+      </div>
+    </div>
+  </div>
+  <div id="alertas-resumen"></div>
+</div>
+
+<!-- ═══ GASTOS ═══ -->
+<div class="pg" id="pg-gastos">
+  <div class="pgtit">Gastos operacionales</div>
+  <div class="pgsub">Cartola banco + tarjeta empresa · datos desde Drive</div>
+  <div class="mf" id="mf-gastos"></div>
+  <div class="g4" id="kpi-gastos"></div>
+  <div class="g2">
+    <div class="cd">
+      <div class="cdh"><span class="cdt">Por categoría</span></div>
+      <div class="cw" style="height:200px"><canvas id="donutChart" role="img" aria-label="Gastos por categoría"></canvas></div>
+      <div id="donut-legend" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:11px;color:var(--mu)"></div>
+    </div>
+    <div class="cd">
+      <div class="cdh"><span class="cdt">Evolución mensual</span></div>
+      <div class="cw" style="height:200px"><canvas id="evChart" role="img" aria-label="Evolución de gastos por mes"></canvas></div>
+    </div>
+  </div>
+  <div class="cd">
+    <div class="cdh"><span class="cdt">Detalle por categoría</span></div>
+    <div id="cat-det"></div>
+  </div>
+</div>
+
+<!-- ═══ VENTAS ═══ -->
+<div class="pg" id="pg-ventas">
+  <div class="pgtit">Ventas Shopify</div>
+  <div class="pgsub">Historial completo desde el día 1 · ago 2024 – hoy</div>
+  <div class="g4" id="kpi-ventas"></div>
+  <div class="g2">
+    <div class="cd">
+      <div class="cdh"><span class="cdt">Ventas mensuales</span></div>
+      <div class="cw"><canvas id="ventasChart" role="img" aria-label="Ventas mensuales Shopify"></canvas></div>
+    </div>
+    <div class="cd">
+      <div class="cdh"><span class="cdt">Por pasarela</span></div>
+      <div class="cw"><canvas id="pasChartFull" role="img" aria-label="Distribución por pasarela"></canvas></div>
+    </div>
+  </div>
+  <div class="g2">
+    <div class="cd">
+      <div class="cdh"><span class="cdt">Ventas por producto (SKU)</span></div>
+      <div class="cw"><canvas id="skuChart" role="img" aria-label="Ventas por SKU"></canvas></div>
+    </div>
+    <div class="cd">
+      <div class="cdh"><span class="cdt">Detalle pasarelas</span></div>
+      <div id="pas-det"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FLUJO ═══ -->
+<div class="pg" id="pg-flujo">
+  <div class="pgtit">Flujo de caja</div>
+  <div class="pgsub">Cuenta corriente Santander — Highlander SPA</div>
+  <div class="g4" id="kpi-flujo"></div>
+  <div class="cd">
+    <div class="cdh"><span class="cdt">Abonos vs cargos por mes</span></div>
+    <div class="cw"><canvas id="flujoChart" role="img" aria-label="Abonos y cargos mensuales"></canvas></div>
+    <div style="display:flex;gap:14px;margin-top:8px;font-size:11px;color:var(--mu)">
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:#2A7D4F;display:inline-block"></span>Abonos</span>
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:#C0392B;display:inline-block"></span>Cargos</span>
+    </div>
+  </div>
+  <div class="cd">
+    <div class="cdh"><span class="cdt">Evolución del saldo</span></div>
+    <div class="cw"><canvas id="saldoChart" role="img" aria-label="Saldo cuenta corriente"></canvas></div>
+  </div>
+  <div id="flujo-alertas"></div>
+</div>
+
+<!-- ═══ MOVIMIENTOS ═══ -->
+<div class="pg" id="pg-movs">
+  <div class="pgtit">Movimientos</div>
+  <div class="pgsub">Todos los movimientos de cartola y tarjeta empresa</div>
+  <div class="mf" id="mf-movs"></div>
+  <div class="cd">
+    <div class="cdh">
+      <span class="cdt" id="mov-tit">Todos los movimientos</span>
+      <span class="bg bbk" id="mov-cnt"></span>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Fecha</th><th>Descripción</th><th>Fuente</th><th class="tr">Monto</th><th>Categoría</th></tr></thead>
+        <tbody id="mov-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FUENTES ═══ -->
+<div class="pg" id="pg-fuentes">
+  <div class="pgtit">Fuentes de datos & archivos</div>
+  <div class="pgsub">Estado de conexión y archivos faltantes por mes</div>
+
+  <div class="cd">
+    <div class="cdh"><span class="cdt">Estado de conexión</span></div>
+    <div id="fuentes-estado"></div>
+  </div>
+
+  <div class="cd">
+    <div class="cdh">
+      <span class="cdt">Cobertura de archivos por mes</span>
+      <span class="bg bbk">Semáforo de completitud</span>
+    </div>
+    <div style="display:flex;gap:14px;margin-bottom:12px;font-size:11px;flex-wrap:wrap">
+      <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:3px;background:#E8F5EE;border:1px solid #2A7D4F;display:inline-block"></span>Completo</span>
+      <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:3px;background:#FEF5E7;border:1px solid #D4820A;display:inline-block"></span>Parcial</span>
+      <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:3px;background:#FDEDEC;border:1px solid #C0392B;display:inline-block"></span>Falta archivo</span>
+    </div>
+    <div id="cobertura-grid"></div>
+  </div>
+
+  <div class="cd">
+    <div class="cdh"><span class="cdt">Cómo agregar datos nuevos</span></div>
+    <div style="font-size:12px;color:var(--mu);line-height:1.8">
+      <strong style="color:var(--tx)">Cada mes, sube estos archivos a Drive:</strong><br><br>
+      <span style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px">
+        <span style="background:var(--k);color:#fff;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap;margin-top:1px">01</span>
+        <span>Cartola Excel desde Santander → carpeta <strong>01 - Cartolas Banco</strong> → nombre: <code style="background:var(--k3);padding:1px 5px;border-radius:3px">cartola_MMMAAAA.xlsx</code></span>
+      </span>
+      <span style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px">
+        <span style="background:var(--k);color:#fff;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap;margin-top:1px">02</span>
+        <span>Estado de cuenta tarjeta PDF → carpeta <strong>02 — Estados de Cuenta Tarjeta</strong> → nombre: <code style="background:var(--k3);padding:1px 5px;border-radius:3px">estado_MMMAAAA.pdf</code></span>
+      </span>
+      <span style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px">
+        <span style="background:var(--o);color:#fff;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap;margin-top:1px">03</span>
+        <span>Exporta el CSV actualizado desde Shopify → carpeta <strong>04 - Ventas Shopify</strong> → reemplaza el archivo anterior</span>
+      </span>
+      <span style="display:flex;align-items:flex-start;gap:8px">
+        <span style="background:var(--o);color:#fff;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap;margin-top:1px">04</span>
+        <span>Presiona <strong>↺ Actualizar datos</strong> en el dashboard — Claude lee todo desde Drive y actualiza automáticamente</span>
+      </span>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════
+const FOLDERS = {
+  cartola: '1Z0gEufRljRk9w17gKNiDt60xccrXz7SN',
+  tarjeta: '1xxCxUy5uGaWQBFEcItQnyI95gGw2Smdk',
+  shopify: '1awxl4DsG1Xi-FLqJKETHDg5Q6lt9KgfK',
+};
+let CFG = { apiKey:'', ...FOLDERS };
+
+// ═══════════════════════════════════════
+//  DATOS — seed con datos reales ya procesados
+// ═══════════════════════════════════════
+let GASTOS = {
+  movimientos: [
+    {f:'02/01/2026',d:'Pago cuota crédito FOGAPE',m:-76627,src:'Cartola',mes:'Ene 2026',cat:'Costo financiero'},
+    {f:'07/01/2026',d:'Préstamo amigo',m:-500000,src:'Cartola',mes:'Ene 2026',cat:'Préstamo externo'},
+    {f:'08/01/2026',d:'Flow S.A. — ventas Shopify',m:27896,src:'Cartola',mes:'Ene 2026',cat:'Ingreso web'},
+    {f:'13/01/2026',d:'Honorarios contadora',m:-35502,src:'Cartola',mes:'Ene 2026',cat:'Servicio externo'},
+    {f:'26/01/2026',d:'Highlander SPA (ingreso propio)',m:236752,src:'Cartola',mes:'Ene 2026',cat:'Ingreso interno'},
+    {f:'26/01/2026',d:'Pago tarjeta empresa',m:-247348,src:'Cartola',mes:'Ene 2026',cat:'Traspaso tarjeta'},
+    {f:'26/01/2026',d:'Pago cuota crédito FOGAPE',m:-76568,src:'Cartola',mes:'Ene 2026',cat:'Costo financiero'},
+    {f:'27/01/2026',d:'Flow S.A. — ventas Shopify',m:46329,src:'Cartola',mes:'Ene 2026',cat:'Ingreso web'},
+    {f:'28/01/2026',d:'Comisión mantención banco',m:-19663,src:'Cartola',mes:'Ene 2026',cat:'Banco'},
+    {f:'12/01/2026',d:'Transferencia RUT 96.938.840-5',m:-22644,src:'Cartola',mes:'Ene 2026',cat:'Por confirmar'},
+    {f:'19/01/2026',d:'Meta Ads (FACEBK)',m:-99380,src:'Tarjeta',mes:'Ene 2026',cat:'Publicidad'},
+    {f:'11/01/2026',d:'Google Ads',m:-30000,src:'Tarjeta',mes:'Ene 2026',cat:'Publicidad'},
+    {f:'01/01/2026',d:'Shopify suscripción',m:-27465,src:'Tarjeta',mes:'Ene 2026',cat:'Herramienta'},
+    {f:'01/01/2026',d:'Google Workspace',m:-7757,src:'Tarjeta',mes:'Ene 2026',cat:'Herramienta'},
+    {f:'01/01/2026',d:'Google Ads',m:-19975,src:'Tarjeta',mes:'Ene 2026',cat:'Publicidad'},
+    {f:'08/01/2026',d:'Copo de Nieve (proveedor)',m:-27350,src:'Tarjeta',mes:'Ene 2026',cat:'Proveedor'},
+    {f:'26/01/2026',d:'Comisiones + IVA tarjeta',m:-6385,src:'Tarjeta',mes:'Ene 2026',cat:'Banco'},
+    {f:'05/02/2026',d:'Comercial Olika — consignación',m:309977,src:'Cartola',mes:'Feb 2026',cat:'Ingreso consignación'},
+    {f:'06/02/2026',d:'Nomadic SPA — consignación',m:40305,src:'Cartola',mes:'Feb 2026',cat:'Ingreso consignación'},
+    {f:'20/02/2026',d:'Wallace SPA — consignación',m:146941,src:'Cartola',mes:'Feb 2026',cat:'Ingreso consignación'},
+    {f:'20/02/2026',d:'Honorarios contadora',m:-35337,src:'Cartola',mes:'Feb 2026',cat:'Servicio externo'},
+    {f:'25/02/2026',d:'Comisión mantención banco',m:-39312,src:'Cartola',mes:'Feb 2026',cat:'Banco'},
+    {f:'26/02/2026',d:'Fintoc SPA',m:49177,src:'Cartola',mes:'Feb 2026',cat:'Ingreso web'},
+    {f:'27/02/2026',d:'Flow S.A.',m:14476,src:'Cartola',mes:'Feb 2026',cat:'Ingreso web'},
+    {f:'04/02/2026',d:'Cobro servicio GETNET',m:-25979,src:'Cartola',mes:'Feb 2026',cat:'Pasarela'},
+    {f:'09/02/2026',d:'Pago tarjeta empresa',m:-1020,src:'Cartola',mes:'Feb 2026',cat:'Traspaso tarjeta'},
+    {f:'27/01/2026',d:'Meta Ads (FACEBK)',m:-52734,src:'Tarjeta',mes:'Feb 2026',cat:'Publicidad'},
+    {f:'31/01/2026',d:'Shopify suscripción',m:-30501,src:'Tarjeta',mes:'Feb 2026',cat:'Herramienta'},
+    {f:'01/02/2026',d:'Google Workspace',m:-7511,src:'Tarjeta',mes:'Feb 2026',cat:'Herramienta'},
+    {f:'01/02/2026',d:'Google Ads',m:-50903,src:'Tarjeta',mes:'Feb 2026',cat:'Publicidad'},
+    {f:'09/02/2026',d:'Meta Ads (FACEBK)',m:-106286,src:'Tarjeta',mes:'Feb 2026',cat:'Publicidad'},
+    {f:'23/02/2026',d:'Comisiones + IVA tarjeta',m:-16521,src:'Tarjeta',mes:'Feb 2026',cat:'Banco'},
+    {f:'02/03/2026',d:'Highlander SPA (ingreso propio)',m:162799,src:'Cartola',mes:'Mar 2026',cat:'Ingreso interno'},
+    {f:'02/03/2026',d:'Pago tarjeta empresa',m:-264457,src:'Cartola',mes:'Mar 2026',cat:'Traspaso tarjeta'},
+    {f:'02/03/2026',d:'Pago cuota crédito FOGAPE',m:-76412,src:'Cartola',mes:'Mar 2026',cat:'Costo financiero'},
+    {f:'03/03/2026',d:'Cobro servicio GETNET',m:-26061,src:'Cartola',mes:'Mar 2026',cat:'Pasarela'},
+    {f:'10/03/2026',d:'Honorarios contadora',m:-35480,src:'Cartola',mes:'Mar 2026',cat:'Servicio externo'},
+    {f:'12/03/2026',d:'Flow S.A.',m:30505,src:'Cartola',mes:'Mar 2026',cat:'Ingreso web'},
+    {f:'13/03/2026',d:'Transferencia RUT 96.938.840-5',m:-67450,src:'Cartola',mes:'Mar 2026',cat:'Por confirmar'},
+    {f:'27/03/2026',d:'Comisión mantención banco',m:-19694,src:'Cartola',mes:'Mar 2026',cat:'Banco'},
+    {f:'27/02/2026',d:'Meta Ads (FACEBK)',m:-102389,src:'Tarjeta',mes:'Mar 2026',cat:'Publicidad'},
+    {f:'01/03/2026',d:'Google Workspace',m:-7544,src:'Tarjeta',mes:'Mar 2026',cat:'Herramienta'},
+    {f:'01/03/2026',d:'Google Ads',m:-1799,src:'Tarjeta',mes:'Mar 2026',cat:'Publicidad'},
+    {f:'02/03/2026',d:'Shopify suscripción',m:-25713,src:'Tarjeta',mes:'Mar 2026',cat:'Herramienta'},
+    {f:'24/03/2026',d:'Comisiones + IVA tarjeta',m:-13253,src:'Tarjeta',mes:'Mar 2026',cat:'Banco'},
+    {f:'01/04/2026',d:'Pago tarjeta empresa',m:-150699,src:'Cartola',mes:'Abr 2026',cat:'Traspaso tarjeta'},
+    {f:'01/04/2026',d:'Pago cuota crédito FOGAPE',m:-76492,src:'Cartola',mes:'Abr 2026',cat:'Costo financiero'},
+    {f:'01/04/2026',d:'Cobro servicio GETNET',m:-26076,src:'Cartola',mes:'Abr 2026',cat:'Pasarela'},
+    {f:'02/04/2026',d:'Flow S.A.',m:18917,src:'Cartola',mes:'Abr 2026',cat:'Ingreso web'},
+    {f:'14/04/2026',d:'Honorarios contadora',m:-35070,src:'Cartola',mes:'Abr 2026',cat:'Servicio externo'},
+    {f:'28/04/2026',d:'Comisión mantención banco',m:-19722,src:'Cartola',mes:'Abr 2026',cat:'Banco'},
+    {f:'27/03/2026',d:'Meta Ads (FACEBK)',m:-25981,src:'Tarjeta',mes:'Abr 2026',cat:'Publicidad'},
+    {f:'01/04/2026',d:'Shopify suscripción',m:-25456,src:'Tarjeta',mes:'Abr 2026',cat:'Herramienta'},
+    {f:'01/04/2026',d:'Google Workspace',m:-7979,src:'Tarjeta',mes:'Abr 2026',cat:'Herramienta'},
+    {f:'01/04/2026',d:'Google Ads',m:-61069,src:'Tarjeta',mes:'Abr 2026',cat:'Publicidad'},
+    {f:'22/04/2026',d:'Comisiones + IVA tarjeta',m:-12787,src:'Tarjeta',mes:'Abr 2026',cat:'Banco'},
+  ]
+};
+
+// Datos reales Shopify procesados
+const SHOPIFY = {
+  total_bruto: 3206293,
+  total_neto:  3165405,
+  total_ordenes: 101,
+  total_anuladas: 20,
+  total_reembolsos: 40888,
+  por_mes: [
+    {mes:'Ago 2024',ordenes:13,total:174488},{mes:'Oct 2024',ordenes:4,total:156132},
+    {mes:'Nov 2024',ordenes:2,total:60912},{mes:'Dic 2024',ordenes:1,total:24990},
+    {mes:'Ene 2025',ordenes:1,total:109960},{mes:'May 2025',ordenes:2,total:61772},
+    {mes:'Jun 2025',ordenes:5,total:151641},{mes:'Jul 2025',ordenes:8,total:190832},
+    {mes:'Ago 2025',ordenes:10,total:374850},{mes:'Sep 2025',ordenes:6,total:205001},
+    {mes:'Oct 2025',ordenes:12,total:338462},{mes:'Nov 2025',ordenes:2,total:75970},
+    {mes:'Dic 2025',ordenes:5,total:216620},{mes:'Ene 2026',ordenes:11,total:401143},
+    {mes:'Feb 2026',ordenes:6,total:156030},{mes:'Mar 2026',ordenes:3,total:82773},
+    {mes:'Abr 2026',ordenes:4,total:208290},{mes:'May 2026',ordenes:5,total:216426},
+  ],
+  por_pasarela: [
+    {pasarela:'Mercado Pago',ordenes:45,total:1564327},
+    {pasarela:'Flow',ordenes:32,total:1097469},
+    {pasarela:'MP Tarjetas',ordenes:9,total:366506},
+    {pasarela:'Transferencia',ordenes:5,total:128010},
+    {pasarela:'Fintoc',ordenes:1,total:49980},
+  ],
+  por_sku: [
+    {sku:'Kupilka 21',unidades:30,ingreso:749770},
+    {sku:'Suova',unidades:28,ingreso:671720},
+    {sku:'Kupilka 37',unidades:22,ingreso:593780},
+    {sku:'Kupilka 55',unidades:10,ingreso:279910},
+    {sku:'Set Cubiertos',unidades:9,ingreso:138910},
+    {sku:'Kupilka 30',unidades:4,ingreso:103970},
+    {sku:'Kupilka 44',unidades:3,ingreso:92980},
+    {sku:'Spork',unidades:3,ingreso:24970},
+  ],
+};
+
+const SALDOS = [
+  {f:'Dic 25',s:858618},{f:'02/01',s:281991},{f:'08/01',s:309887},
+  {f:'27/01',s:186938},{f:'05/02',s:470936},{f:'20/02',s:621826},
+  {f:'27/02',s:646167},{f:'02/03',s:468097},{f:'12/03',s:412072},
+  {f:'27/03',s:324928},{f:'01/04',s:71661},{f:'02/04',s:90578},
+  {f:'14/04',s:55509},{f:'28/04',s:35787},
+];
+
+// ═══════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════
+const fmt = n => '$'+Math.abs(Math.round(n)).toLocaleString('es-CL');
+const CAT_COLORS = {
+  'Publicidad':'#F6861F','Costo financiero':'#7F77DD','Banco':'#888780',
+  'Pasarela':'#B4B2A9','Servicio externo':'#5DCAA5','Herramienta':'#639922',
+  'Por confirmar':'#EF9F27','Ingreso web':'#2A7D4F','Ingreso consignación':'#1D9E75',
+  'Ingreso interno':'#0F6E56','Traspaso tarjeta':'#ddd','Préstamo externo':'#D4820A','Proveedor':'#9B59B6',
+};
+const PAS_COLORS = ['#430300','#F6861F','#2A7D4F','#378ADD','#D4820A','#7F77DD'];
+const SKU_COLORS = ['#430300','#F6861F','#2A7D4F','#378ADD','#D4820A','#7F77DD','#5DCAA5','#9B59B6'];
+
+function toast(msg){ const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800); }
+function setStatus(s,t){ document.getElementById('sDot').className='dot '+s;document.getElementById('sTxt').textContent=t; }
+function setL(m,s){ document.getElementById('lm').textContent=m;document.getElementById('ls').textContent=s||''; }
+
+let activeMes = 'todos';
+let meses_gastos = [...new Set(GASTOS.movimientos.map(m=>m.mes))];
+
+// Gráficos
+let chRes=null,chPas=null,chDon=null,chEv=null,chVen=null,chPasF=null,chSku=null,chFlu=null,chSal=null;
+
+// ═══════════════════════════════════════
+//  CONFIG MODAL
+// ═══════════════════════════════════════
+function showCfg(){
+  document.getElementById('cfgKey').value=CFG.apiKey;
+  document.getElementById('cfgCartola').value=CFG.cartola;
+  document.getElementById('cfgTarjeta').value=CFG.tarjeta;
+  document.getElementById('cfgShopify').value=CFG.shopify;
+  document.getElementById('cfgModal').classList.add('on');
+}
+function hideCfg(){ document.getElementById('cfgModal').classList.remove('on'); }
+function saveCfg(){
+  CFG.apiKey  = document.getElementById('cfgKey').value.trim();
+  CFG.cartola = document.getElementById('cfgCartola').value.trim()||FOLDERS.cartola;
+  CFG.tarjeta = document.getElementById('cfgTarjeta').value.trim()||FOLDERS.tarjeta;
+  CFG.shopify = document.getElementById('cfgShopify').value.trim()||FOLDERS.shopify;
+  localStorage.setItem('kupilka_cfg', JSON.stringify(CFG));
+  hideCfg();
+  if(CFG.apiKey){ document.getElementById('btnRun').disabled=false; setStatus('ok','Listo · presiona Actualizar'); toast('✅ Configuración guardada'); }
+}
+
+// ═══════════════════════════════════════
+//  CLAUDE API + MCP DRIVE
+// ═══════════════════════════════════════
+async function callClaude(system, prompt){
+  const res = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:4000,
+      system,
+      messages:[{role:'user',content:prompt}],
+      mcp_servers:[{type:'url',url:'https://drivemcp.googleapis.com/mcp/v1',name:'google-drive'}]
+    })
+  });
+  const data = await res.json();
+  if(data.error) throw new Error(data.error.message);
+  return (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
+}
+
+async function cargarDatos(){
+  if(!CFG.apiKey){ showCfg(); return; }
+  document.getElementById('ldg').classList.remove('hid');
+  document.getElementById('btnRun').disabled=true;
+  setStatus('sp','Leyendo Drive…');
+
+  try {
+    // PASO 1: Listar archivos
+    setL('Buscando archivos en Drive…','Carpetas 01, 02 y 04');
+    const listaRaw = await callClaude(
+      'Eres un asistente que lista archivos de Google Drive. Responde SOLO con JSON válido.',
+      `Lista todos los archivos en estas carpetas de Google Drive:
+- Cartolas banco: carpeta ID "${CFG.cartola}"
+- Estados cuenta tarjeta: carpeta ID "${CFG.tarjeta}"
+- Ventas Shopify: carpeta ID "${CFG.shopify}"
+
+Responde SOLO con este JSON:
+{"archivos":[{"id":"...","nombre":"...","tipo":"cartola|tarjeta|shopify","fecha_modificacion":"..."}]}`
+    );
+    let archivos = [];
+    try{ archivos = JSON.parse(listaRaw.replace(/```json|```/g,'').trim()).archivos||[]; }catch(e){ archivos=[]; }
+
+    // Detectar qué meses tienen archivos
+    const mesesConArchivo = detectarCobertura(archivos);
+
+    // PASO 2: Leer cartolas
+    setL('Leyendo cartolas bancarias…','Extrayendo movimientos');
+    const cartolaIds = archivos.filter(a=>a.tipo==='cartola').map(a=>a.id);
+    if(cartolaIds.length > 0){
+      const cartRaw = await callClaude(
+        `Eres analizador financiero de Kupilka Chile (Highlander SPA, RUT 77.951.298-3).
+Lee cartolas Santander Excel. Responde SOLO con JSON.
+Categorías: Publicidad(FACEBK/GOOGLE ADS), Herramienta(SHOPIFY/Workspace), Costo financiero(FOGAPE/cuota crédito), Banco(mantención/comisión), Pasarela(GETNET/Flow/Fintoc), Servicio externo(contadora/RUT 12.691.270-6), Ingreso consignación(Olika/Nomadic/Wallace/empresas), Ingreso web(Flow/Fintoc/GETNET abono), Traspaso tarjeta(pago tarjeta), Por confirmar(RUTs sin descripción).`,
+        `Lee estos archivos de cartola bancaria de Google Drive: ${cartolaIds.map(id=>`ID: "${id}"`).join(', ')}
+Extrae TODOS los movimientos y devuelve SOLO este JSON:
+{"movimientos":[{"f":"DD/MM/YYYY","d":"descripcion","m":monto_numero,"src":"Cartola","mes":"Mmm YYYY","cat":"categoria"}]}`
+      );
+      try{
+        const parsed = JSON.parse(cartRaw.replace(/```json|```/g,'').trim());
+        if(parsed.movimientos?.length > 0) GASTOS.movimientos = parsed.movimientos;
+      }catch(e){}
+    }
+
+    // PASO 3: Leer estados tarjeta
+    setL('Leyendo estados de cuenta tarjeta…','Master Empresa LATAM ••3397');
+    const tarjetaIds = archivos.filter(a=>a.tipo==='tarjeta').map(a=>a.id);
+    if(tarjetaIds.length > 0){
+      const tarRaw = await callClaude(
+        'Eres analizador financiero. Lee estados de cuenta PDF tarjeta Santander Master Empresa LATAM. Responde SOLO con JSON.',
+        `Lee estos PDFs de estado de cuenta tarjeta: ${tarjetaIds.map(id=>`ID: "${id}"`).join(', ')}
+Extrae todos los cargos y devuelve SOLO este JSON:
+{"movimientos":[{"f":"DD/MM/YYYY","d":"descripcion","m":monto_negativo,"src":"Tarjeta","mes":"Mmm YYYY","cat":"Publicidad|Herramienta|Banco"}]}`
+      );
+      try{
+        const parsed = JSON.parse(tarRaw.replace(/```json|```/g,'').trim());
+        if(parsed.movimientos?.length > 0){
+          GASTOS.movimientos = [...GASTOS.movimientos, ...parsed.movimientos];
+        }
+      }catch(e){}
+    }
+
+    // PASO 4: Leer Shopify CSV
+    setL('Leyendo ventas Shopify…','Procesando historial completo');
+    const shopifyIds = archivos.filter(a=>a.tipo==='shopify').map(a=>a.id);
+    if(shopifyIds.length > 0){
+      const shopRaw = await callClaude(
+        'Eres analizador financiero. Lee CSV de Shopify. Responde SOLO con JSON.',
+        `Lee este archivo CSV de ventas Shopify: ID "${shopifyIds[0]}"
+Procesa solo órdenes con Financial Status = "paid".
+Devuelve SOLO este JSON:
+{"total_neto":number,"total_ordenes":number,"por_mes":[{"mes":"Mmm YYYY","ordenes":n,"total":n}],"por_pasarela":[{"pasarela":"nombre","ordenes":n,"total":n}],"por_sku":[{"sku":"nombre","unidades":n,"ingreso":n}]}`
+      );
+      try{
+        const parsed = JSON.parse(shopRaw.replace(/```json|```/g,'').trim());
+        if(parsed.total_ordenes > 0){ Object.assign(SHOPIFY, parsed); }
+      }catch(e){}
+    }
+
+    meses_gastos = [...new Set(GASTOS.movimientos.map(m=>m.mes))];
+    setStatus('ok',`Actualizado · ${new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'})}`);
+    document.getElementById('sub-resumen').textContent=`Highlander SPA · RUT 77.951.298-3 · ${meses_gastos.length} meses cargados`;
+    renderTodo();
+    toast(`✅ Datos actualizados desde Drive`);
+
+  } catch(e){
+    setStatus('err','Error: '+e.message);
+    toast('❌ '+e.message);
+    renderTodo();
+  }
+
+  document.getElementById('ldg').classList.add('hid');
+  document.getElementById('btnRun').disabled=false;
+}
+
+function detectarCobertura(archivos){
+  // Generar meses desde ago 2024 hasta hoy
+  const meses = [];
+  let d = new Date(2024,7,1); // ago 2024
+  const hoy = new Date();
+  while(d <= hoy){
+    meses.push({
+      key: d.toISOString().slice(0,7),
+      label: d.toLocaleDateString('es-CL',{month:'short',year:'numeric'}),
+      tieneCartola: false, tieneTarjeta: false, tieneShopify: false
+    });
+    d = new Date(d.getFullYear(), d.getMonth()+1, 1);
+  }
+  // Marcar según archivos encontrados
+  archivos.forEach(a => {
+    const nombre = a.nombre.toLowerCase();
+    const match = nombre.match(/(\d{4}[-_]?\d{2}|ene|feb|mar|abr|may|jun|jul|ago|sep|oct|nov|dic)/);
+    if(match){
+      meses.forEach(m => {
+        if(nombre.includes('cartola')) m.tieneCartola = true;
+        if(nombre.includes('estado')) m.tieneTarjeta = true;
+        if(nombre.includes('shopify') || nombre.includes('orders')) m.tieneShopify = true;
+      });
+    }
+  });
+  return meses;
+}
+
+// ═══════════════════════════════════════
+//  FILTROS
+// ═══════════════════════════════════════
+function getFiltrado(){
+  if(activeMes==='todos') return GASTOS.movimientos;
+  return GASTOS.movimientos.filter(m=>m.mes===activeMes);
+}
+function getGastos(movs){ return movs.filter(m=>m.m<0 && m.cat!=='Traspaso tarjeta'); }
+function setMes(mes){ activeMes=mes; renderMonthFilters(); renderKpiGastos(); renderCatDet(); renderDonut(); renderMovs(); }
+function renderMonthFilters(){
+  const meses=['todos',...meses_gastos];
+  ['mf-gastos','mf-movs'].forEach(id=>{
+    document.getElementById(id).innerHTML=meses.map(m=>
+      `<button class="mfb ${activeMes===m?'on':''}" onclick="setMes('${m}')">${m==='todos'?'Todos':m}</button>`
+    ).join('');
+  });
+}
+
+// ═══════════════════════════════════════
+//  RENDER TODO
+// ═══════════════════════════════════════
+function renderTodo(){
+  renderMonthFilters();
+  renderKpiResumen();
+  renderResumenChart();
+  renderPasChart();
+  renderTopProds();
+  renderAlertasResumen();
+  renderKpiGastos();
+  renderCatDet();
+  renderDonut();
+  renderEvolucion();
+  renderKpiVentas();
+  renderVentasChart();
+  renderPasChartFull();
+  renderSkuChart();
+  renderPasDet();
+  renderKpiFlujo();
+  renderFlujoChart();
+  renderSaldoChart();
+  renderFlujoAlertas();
+  renderMovs();
+  renderFuentes();
+  renderCobertura();
+  document.getElementById('badge-periodo').textContent = activeMes==='todos'?`${meses_gastos.length} meses`:activeMes;
+}
+
+// ─── RESUMEN ───
+function renderKpiResumen(){
+  const gastos = getGastos(getFiltrado());
+  const ingresos = getFiltrado().filter(m=>m.m>0);
+  const tG = gastos.reduce((a,m)=>a+Math.abs(m.m),0);
+  const tI = ingresos.reduce((a,m)=>a+m.m,0);
+  const tShop = SHOPIFY.total_neto;
+  const consig = getFiltrado().filter(m=>m.cat==='Ingreso consignación').reduce((a,m)=>a+m.m,0);
+  document.getElementById('kpi-resumen').innerHTML=`
+    <div class="mt mk"><div class="ml">Ventas Shopify (histórico)</div><div class="mv vg">${fmt(tShop)}</div><div class="ms">101 órdenes · ago 2024–hoy</div></div>
+    <div class="mt mg"><div class="ml">Consignaciones (2026)</div><div class="mv vg">${fmt(497223)}</div><div class="ms">Olika + Nomadic + Wallace</div></div>
+    <div class="mt mr"><div class="ml">Gastos operac. (ene–abr)</div><div class="mv vr">${fmt(tG)}</div></div>
+    <div class="mt ${SALDOS.at(-1).s<100000?'mr':'mg'}"><div class="ml">Saldo cuenta actual</div><div class="mv ${SALDOS.at(-1).s<100000?'vr':'vg'}">${fmt(SALDOS.at(-1).s)}</div><div class="ms">Santander Highlander SPA</div></div>
+  `;
+}
+
+function renderResumenChart(){
+  // Cruzar meses de gastos con ventas Shopify
+  const mesesGasto = ['Ene 2026','Feb 2026','Mar 2026','Abr 2026'];
+  const gastosPorMes = mesesGasto.map(m=>{
+    return getGastos(GASTOS.movimientos.filter(r=>r.mes===m)).reduce((a,r)=>a+Math.abs(r.m),0);
+  });
+  const shopPorMes = mesesGasto.map(m=>{
+    const ms = m.replace(' ','').replace('Ene','Jan').replace('Feb','Feb').replace('Mar','Mar').replace('Abr','Apr');
+    const found = SHOPIFY.por_mes.find(p=>p.mes===m||p.mes.includes(m.split(' ')[0]));
+    return found?.total||0;
+  });
+  const labels = mesesGasto.map(m=>m.split(' ')[0]);
+  if(chRes){ chRes.data.labels=labels;chRes.data.datasets[0].data=shopPorMes;chRes.data.datasets[1].data=gastosPorMes;chRes.update();return; }
+  chRes=new Chart(document.getElementById('resumenChart'),{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'Ingresos Shopify',data:shopPorMes,backgroundColor:'#2A7D4F44',borderColor:'#2A7D4F',borderWidth:1.5,borderRadius:4},
+      {label:'Gastos',data:gastosPorMes,backgroundColor:'#C0392B44',borderColor:'#C0392B',borderWidth:1.5,borderRadius:4}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+fmt(ctx.parsed.y)}}},scales:{y:{ticks:{callback:v=>'$'+(v/1000).toFixed(0)+'K'}},x:{grid:{display:false}}}}
+  });
+}
+
+function renderPasChart(){
+  const pas=SHOPIFY.por_pasarela;
+  if(chPas){chPas.data.labels=pas.map(p=>p.pasarela);chPas.data.datasets[0].data=pas.map(p=>p.total);chPas.update();return;}
+  chPas=new Chart(document.getElementById('pasChart'),{
+    type:'doughnut',
+    data:{labels:pas.map(p=>p.pasarela),datasets:[{data:pas.map(p=>p.total),backgroundColor:PAS_COLORS,borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.label+': '+fmt(ctx.parsed)}}}}
+  });
+}
+
+function renderTopProds(){
+  const max=SHOPIFY.por_sku[0]?.ingreso||1;
+  document.getElementById('top-prods').innerHTML=SHOPIFY.por_sku.slice(0,5).map((s,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(67,3,0,.05)">
+      <span style="font-size:11px;color:var(--mu);min-width:14px">${i+1}</span>
+      <span style="flex:1;font-size:12px;font-weight:700">${s.sku}</span>
+      <span style="font-size:11px;color:var(--mu)">${s.unidades} uds</span>
+      <span style="font-size:12px;font-weight:700;color:var(--k)">${fmt(s.ingreso)}</span>
+    </div>`).join('');
+}
+
+function renderAlertasResumen(){
+  document.getElementById('alertas-resumen').innerHTML=[
+    {t:'e',title:'Saldo crítico — abril 2026',body:'La cuenta cerró abril con $35.787. Sin ingresos de consignación ese mes. Mayo necesita cobrar puntos de consignación con urgencia.'},
+    {t:'w',title:'Brecha entre ventas Shopify y saldo bancario',body:'Shopify muestra $208.290 en ventas de abril, pero solo llegaron $18.917 a la cuenta. La diferencia está en plazos de liquidación de pasarelas (Flow/Mercado Pago tienen 2-5 días hábiles).'},
+    {t:'i',title:'Kupilka 21 y Suova lideran ventas históricas',body:'Entre los dos suman $1.421.490 (45% de los ingresos Shopify). Son los productos ancla del catálogo.'},
+  ].map(a=>`<div class="alb al${a.t}"><div><div class="alt">${a.title}</div><div class="albd">${a.body}</div></div></div>`).join('');
+}
+
+// ─── GASTOS ───
+function renderKpiGastos(){
+  const gastos=getGastos(getFiltrado());
+  const total=gastos.reduce((a,m)=>a+Math.abs(m.m),0);
+  const pub=gastos.filter(m=>m.cat==='Publicidad').reduce((a,m)=>a+Math.abs(m.m),0);
+  const fijos=gastos.filter(m=>['Costo financiero','Banco','Pasarela','Servicio externo','Herramienta'].includes(m.cat)).reduce((a,m)=>a+Math.abs(m.m),0);
+  const pend=gastos.filter(m=>m.cat==='Por confirmar').reduce((a,m)=>a+Math.abs(m.m),0);
+  document.getElementById('kpi-gastos').innerHTML=`
+    <div class="mt mk"><div class="ml">Total gastos</div><div class="mv vr">${fmt(total)}</div></div>
+    <div class="mt mw"><div class="ml">Publicidad digital</div><div class="mv vw">${fmt(pub)}</div><div class="ms">${Math.round(pub/total*100)}% del total</div></div>
+    <div class="mt"><div class="ml">Gastos fijos</div><div class="mv">${fmt(fijos)}</div><div class="ms">${Math.round(fijos/total*100)}% del total</div></div>
+    <div class="mt ${pend>0?'mr':'mg'}"><div class="ml">Por confirmar</div><div class="mv ${pend>0?'vr':'vg'}">${fmt(pend)}</div></div>
+  `;
+}
+
+function renderCatDet(){
+  const gastos=getGastos(getFiltrado());
+  const byCat={};
+  gastos.forEach(m=>{byCat[m.cat||'Otro']=(byCat[m.cat||'Otro']||0)+Math.abs(m.m);});
+  const total=Object.values(byCat).reduce((a,b)=>a+b,0);
+  const sorted=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  const maxV=sorted[0]?.[1]||1;
+  document.getElementById('cat-det').innerHTML=sorted.map(([cat,val])=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(67,3,0,.05)">
+      <span style="flex:1;font-size:12px">${cat}</span>
+      <span style="font-size:11px;color:var(--mu);margin:0 10px">${Math.round(val/total*100)}%</span>
+      <span style="font-size:12px;font-weight:700;min-width:90px;text-align:right">${fmt(val)}</span>
+      <div style="width:80px;margin-left:10px"><div class="prg"><div class="prf" style="width:${Math.round(val/maxV*100)}%;background:${CAT_COLORS[cat]||'#888'}"></div></div></div>
+    </div>`).join('')+
+    `<div style="display:flex;justify-content:space-between;padding:8px 0;font-weight:700;font-size:13px;border-top:2px solid var(--bd2);margin-top:4px"><span>Total</span><span>${fmt(total)}</span></div>`;
+}
+
+function renderDonut(){
+  const gastos=getGastos(getFiltrado());
+  const byCat={};gastos.forEach(m=>{byCat[m.cat||'Otro']=(byCat[m.cat||'Otro']||0)+Math.abs(m.m);});
+  const labels=Object.keys(byCat),vals=Object.values(byCat),colors=labels.map(l=>CAT_COLORS[l]||'#aaa');
+  const total=vals.reduce((a,b)=>a+b,0);
+  if(chDon){chDon.data.labels=labels;chDon.data.datasets[0].data=vals;chDon.data.datasets[0].backgroundColor=colors;chDon.update();}
+  else chDon=new Chart(document.getElementById('donutChart'),{type:'doughnut',data:{labels,datasets:[{data:vals,backgroundColor:colors,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.label+': '+fmt(ctx.parsed)}}}}});
+  document.getElementById('donut-legend').innerHTML=labels.map((l,i)=>`<span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:${colors[i]};display:inline-block"></span>${l} ${Math.round(vals[i]/total*100)}%</span>`).join('');
+}
+
+function renderEvolucion(){
+  const vals=meses_gastos.map(m=>getGastos(GASTOS.movimientos.filter(r=>r.mes===m)).reduce((a,r)=>a+Math.abs(r.m),0));
+  const labels=meses_gastos.map(m=>m.split(' ')[0]);
+  if(chEv){chEv.data.labels=labels;chEv.data.datasets[0].data=vals;chEv.update();return;}
+  chEv=new Chart(document.getElementById('evChart'),{type:'bar',data:{labels,datasets:[{data:vals,backgroundColor:'#43030033',borderColor:'#430300',borderWidth:1.5,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmt(ctx.parsed.y)}}},scales:{y:{ticks:{callback:v=>'$'+(v/1000).toFixed(0)+'K'}},x:{grid:{display:false}}}}});
+}
+
+// ─── VENTAS ───
+function renderKpiVentas(){
+  const mejorMes=SHOPIFY.por_mes.reduce((a,b)=>b.total>a.total?b:a,{total:0});
+  const ticketProm=Math.round(SHOPIFY.total_neto/SHOPIFY.total_ordenes);
+  document.getElementById('kpi-ventas').innerHTML=`
+    <div class="mt mk"><div class="ml">Total neto Shopify</div><div class="mv vg">${fmt(SHOPIFY.total_neto)}</div><div class="ms">Desde ago 2024</div></div>
+    <div class="mt mg"><div class="ml">Órdenes pagadas</div><div class="mv">${SHOPIFY.total_ordenes}</div><div class="ms">de 125 totales</div></div>
+    <div class="mt"><div class="ml">Ticket promedio</div><div class="mv vo">${fmt(ticketProm)}</div></div>
+    <div class="mt"><div class="ml">Mejor mes</div><div class="mv">${mejorMes.mes}</div><div class="ms">${fmt(mejorMes.total)} · ${mejorMes.ordenes} órdenes</div></div>
+  `;
+}
+
+function renderVentasChart(){
+  const labels=SHOPIFY.por_mes.map(m=>m.mes);
+  const vals=SHOPIFY.por_mes.map(m=>m.total);
+  if(chVen){chVen.data.labels=labels;chVen.data.datasets[0].data=vals;chVen.update();return;}
+  chVen=new Chart(document.getElementById('ventasChart'),{type:'bar',data:{labels,datasets:[{data:vals,backgroundColor:'#43030022',borderColor:'#430300',borderWidth:1.5,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmt(ctx.parsed.y)}}},scales:{y:{ticks:{callback:v=>'$'+(v/1000).toFixed(0)+'K'}},x:{ticks:{font:{size:9},maxRotation:45,autoSkip:true,maxTicksLimit:10},grid:{display:false}}}}});
+}
+
+function renderPasChartFull(){
+  const pas=SHOPIFY.por_pasarela;
+  if(chPasF){chPasF.update();return;}
+  chPasF=new Chart(document.getElementById('pasChartFull'),{type:'bar',data:{labels:pas.map(p=>p.pasarela),datasets:[{data:pas.map(p=>p.total),backgroundColor:PAS_COLORS.map(c=>c+'44'),borderColor:PAS_COLORS,borderWidth:1.5,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmt(ctx.parsed.x)}}},scales:{x:{ticks:{callback:v=>'$'+(v/1000000).toFixed(1)+'M'}},y:{ticks:{font:{size:10}},grid:{display:false}}}}});
+}
+
+function renderSkuChart(){
+  const sku=SHOPIFY.por_sku;
+  if(chSku){chSku.update();return;}
+  chSku=new Chart(document.getElementById('skuChart'),{type:'bar',data:{labels:sku.map(s=>s.sku),datasets:[{label:'Ingreso',data:sku.map(s=>s.ingreso),backgroundColor:SKU_COLORS.map(c=>c+'44'),borderColor:SKU_COLORS,borderWidth:1.5,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmt(ctx.parsed.x)+' · '+sku[ctx.dataIndex].unidades+' uds'}}},scales:{x:{ticks:{callback:v=>'$'+(v/1000).toFixed(0)+'K'}},y:{ticks:{font:{size:10}},grid:{display:false}}}}});
+}
+
+function renderPasDet(){
+  const total=SHOPIFY.por_pasarela.reduce((a,p)=>a+p.total,0);
+  document.getElementById('pas-det').innerHTML=`
+    <table><thead><tr><th>Pasarela</th><th class="tc">Órdenes</th><th class="tr">Total</th><th>%</th></tr></thead>
+    <tbody>${SHOPIFY.por_pasarela.map((p,i)=>`<tr>
+      <td style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:2px;background:${PAS_COLORS[i]};display:inline-block"></span>${p.pasarela}</td>
+      <td class="tc">${p.ordenes}</td><td class="tr tb">${fmt(p.total)}</td>
+      <td><div class="prg"><div class="prf" style="width:${Math.round(p.total/total*100)}%;background:${PAS_COLORS[i]}"></div></div><span style="font-size:10px;color:var(--mu)">${Math.round(p.total/total*100)}%</span></td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
+// ─── FLUJO ───
+function renderKpiFlujo(){
+  const ab=GASTOS.movimientos.filter(m=>m.m>0).reduce((a,m)=>a+m.m,0);
+  const ca=GASTOS.movimientos.filter(m=>m.m<0).reduce((a,m)=>a+Math.abs(m.m),0);
+  const consig=GASTOS.movimientos.filter(m=>m.cat==='Ingreso consignación').reduce((a,m)=>a+m.m,0);
+  document.getElementById('kpi-flujo').innerHTML=`
+    <div class="mt mk"><div class="ml">Saldo inicial dic 2025</div><div class="mv">${fmt(858618)}</div></div>
+    <div class="mt mg"><div class="ml">Total abonos ene–abr</div><div class="mv vg">${fmt(ab)}</div></div>
+    <div class="mt mr"><div class="ml">Total cargos ene–abr</div><div class="mv vr">${fmt(ca)}</div></div>
+    <div class="mt"><div class="ml">Consignaciones cobradas</div><div class="mv vg">${fmt(consig)}</div></div>
+  `;
+}
+
+function renderFlujoChart(){
+  const ab=meses_gastos.map(m=>GASTOS.movimientos.filter(r=>r.mes===m&&r.m>0).reduce((a,r)=>a+r.m,0));
+  const ca=meses_gastos.map(m=>GASTOS.movimientos.filter(r=>r.mes===m&&r.m<0).reduce((a,r)=>a+Math.abs(r.m),0));
+  const labels=meses_gastos.map(m=>m.split(' ')[0]);
+  if(chFlu){chFlu.data.labels=labels;chFlu.data.datasets[0].data=ab;chFlu.data.datasets[1].data=ca;chFlu.update();return;}
+  chFlu=new Chart(document.getElementById('flujoChart'),{type:'bar',data:{labels,datasets:[{label:'Abonos',data:ab,backgroundColor:'#2A7D4F44',borderColor:'#2A7D4F',borderWidth:1.5,borderRadius:4},{label:'Cargos',data:ca,backgroundColor:'#C0392B44',borderColor:'#C0392B',borderWidth:1.5,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+fmt(ctx.parsed.y)}}},scales:{y:{ticks:{callback:v=>'$'+(v/1000).toFixed(0)+'K'}},x:{grid:{display:false}}}}});
+}
+
+function renderSaldoChart(){
+  if(chSal){chSal.update();return;}
+  chSal=new Chart(document.getElementById('saldoChart'),{type:'line',data:{labels:SALDOS.map(s=>s.f),datasets:[{data:SALDOS.map(s=>s.s),borderColor:'#7F77DD',backgroundColor:'#7F77DD22',tension:.3,fill:true,pointRadius:3,pointBackgroundColor:'#7F77DD',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmt(ctx.parsed.y)}}},scales:{y:{ticks:{callback:v=>'$'+(v/1000).toFixed(0)+'K'}},x:{ticks:{font:{size:9},maxRotation:45,autoSkip:true,maxTicksLimit:12},grid:{display:false}}}}});
+}
+
+function renderFlujoAlertas(){
+  document.getElementById('flujo-alertas').innerHTML=[
+    {t:'e',title:'Saldo crítico — abril 2026',body:'Cuenta cerró con $35.787. Menos que una cuota del crédito FOGAPE. Requiere ingreso urgente en mayo.'},
+    {t:'w',title:'Dependencia de consignaciones',body:'Feb tuvo $497.223 en consignaciones. Mar y abr: $0. El flujo de caja es irregular y depende del timing de esos cobros.'},
+    {t:'i',title:'Préstamo $500.000 de enero',body:'Registrado como préstamo de tercero. Pendiente registrar como pasivo en el módulo de aportes (próxima fase).'},
+  ].map(a=>`<div class="alb al${a.t}"><div><div class="alt">${a.title}</div><div class="albd">${a.body}</div></div></div>`).join('');
+}
+
+// ─── MOVIMIENTOS ───
+function renderMovs(){
+  const rows=getFiltrado();
+  document.getElementById('mov-tit').textContent=activeMes==='todos'?'Todos los movimientos':activeMes;
+  document.getElementById('mov-cnt').textContent=rows.length+' registros';
+  const chip=c=>{
+    if(!c) return `<span class="ch chq">Sin cat.</span>`;
+    if(c.includes('Ingreso')) return `<span class="ch chi">${c}</span>`;
+    if(c==='Publicidad') return `<span class="ch chp">${c}</span>`;
+    if(['Costo financiero','Banco','Pasarela'].includes(c)) return `<span class="ch chf">${c}</span>`;
+    if(c==='Por confirmar') return `<span class="ch chq">${c}</span>`;
+    if(c==='Traspaso tarjeta') return `<span class="ch cht">${c}</span>`;
+    return `<span class="ch chv">${c}</span>`;
+  };
+  document.getElementById('mov-body').innerHTML=rows.map(r=>`<tr>
+    <td class="cm" style="white-space:nowrap">${r.f||''}</td>
+    <td>${r.d||''}</td>
+    <td class="cm">${r.src||''}</td>
+    <td class="tr tb" style="white-space:nowrap;color:${r.m>=0?'var(--g)':'var(--r)'}">${r.m>=0?'+':''}${fmt(r.m)}</td>
+    <td>${chip(r.cat)}</td>
+  </tr>`).join('');
+}
+
+// ─── FUENTES ───
+function renderFuentes(){
+  document.getElementById('fuentes-estado').innerHTML=[
+    {nom:'Cartolas banco (Santander Excel)',sub:`Carpeta: 01 - Cartolas Banco · ID: ${FOLDERS.cartola}`,ok:true},
+    {nom:'Estados cuenta tarjeta (PDF)',sub:`Carpeta: 02 — Estados de Cuenta Tarjeta · ID: ${FOLDERS.tarjeta}`,ok:true},
+    {nom:'Ventas Shopify (CSV)',sub:`Carpeta: 04 - Ventas Shopify · ID: ${FOLDERS.shopify}`,ok:true},
+    {nom:'Publicidad Meta Ads',sub:'Carpeta: 06 - Publicidad Meta Ads · Pendiente',ok:false},
+    {nom:'Costos de productos',sub:'Pendiente — Fase 2',ok:false},
+  ].map(f=>`<div class="frow">
+    <div><div class="fn">${f.nom}</div><div class="fsb">${f.sub}</div></div>
+    <div class="fst ${f.ok?'dok':'derr'}">${f.ok?'✓ Conectado':'Pendiente'}</div>
+  </div>`).join('');
+}
+
+function renderCobertura(){
+  // Meses desde ago 2024
+  const meses=[];
+  let d=new Date(2024,7,1);
+  const hoy=new Date(2026,4,22);
+  while(d<=hoy){ meses.push({label:d.toLocaleDateString('es-CL',{month:'short',year:'2-digit'}),key:d.toISOString().slice(0,7)}); d=new Date(d.getFullYear(),d.getMonth()+1,1); }
+
+  // Estado real por mes
+  const cobertura={
+    '2024-08':{c:false,t:false,s:true},'2024-09':{c:false,t:false,s:false},
+    '2024-10':{c:false,t:false,s:true},'2024-11':{c:false,t:false,s:true},
+    '2024-12':{c:false,t:false,s:true},'2025-01':{c:false,t:false,s:true},
+    '2025-02':{c:false,t:false,s:true},'2025-03':{c:false,t:false,s:false},
+    '2025-04':{c:false,t:false,s:false},'2025-05':{c:false,t:false,s:true},
+    '2025-06':{c:false,t:false,s:true},'2025-07':{c:false,t:false,s:true},
+    '2025-08':{c:false,t:false,s:true},'2025-09':{c:false,t:false,s:true},
+    '2025-10':{c:false,t:false,s:true},'2025-11':{c:false,t:false,s:true},
+    '2025-12':{c:false,t:false,s:true},'2026-01':{c:true,t:true,s:true},
+    '2026-02':{c:true,t:true,s:true},'2026-03':{c:true,t:true,s:true},
+    '2026-04':{c:true,t:true,s:true},'2026-05':{c:false,t:false,s:true},
+  };
+
+  document.getElementById('cobertura-grid').innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:6px">
+    ${meses.map(m=>{
+      const cv=cobertura[m.key]||{c:false,t:false,s:false};
+      const completo=cv.c&&cv.t&&cv.s;
+      const parcial=(cv.c||cv.t||cv.s)&&!completo;
+      const cls=completo?'mcok':parcial?'mcpar':'mcmis';
+      return `<div class="missing-cell ${cls}">
+        <div class="mc-mes">${m.label}</div>
+        <div style="font-size:9px;margin-top:3px;display:flex;flex-direction:column;gap:1px;text-align:left">
+          <span>${cv.c?'✓':'✗'} Cartola</span>
+          <span>${cv.t?'✓':'✗'} Tarjeta</span>
+          <span>${cv.s?'✓':'✗'} Shopify</span>
+        </div>
+      </div>`;
+    }).join('')}
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--mu)">
+      <strong style="color:var(--r)">Archivos faltantes:</strong> Las cartolas y estados de cuenta de ago 2024 – dic 2025 no están en Drive todavía. Súbelos para tener el historial financiero completo.
+    </div>`;
+}
+
+// ═══════════════════════════════════════
+//  NAVEGACIÓN
+// ═══════════════════════════════════════
+function showPg(id,el){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  document.getElementById('pg-'+id).classList.add('on');
+  if(el) el.classList.add('on');
+}
+
+// ═══════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════
+window.addEventListener('load',()=>{
+  try{ const s=JSON.parse(localStorage.getItem('kupilka_cfg')||'{}'); if(s.apiKey) CFG={...CFG,...s}; }catch(e){}
+  document.getElementById('cfgKey').value=CFG.apiKey;
+  document.getElementById('cfgCartola').value=CFG.cartola||FOLDERS.cartola;
+  document.getElementById('cfgTarjeta').value=CFG.tarjeta||FOLDERS.tarjeta;
+  document.getElementById('cfgShopify').value=CFG.shopify||FOLDERS.shopify;
+  if(CFG.apiKey){ document.getElementById('btnRun').disabled=false; setStatus('ok','Listo · presiona Actualizar'); }
+  else{ setStatus('err','Falta API key'); showCfg(); }
+  renderTodo();
+});
+</script>
+</body>
+</html>
